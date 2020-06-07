@@ -1,6 +1,7 @@
 import pygame as pg
 import sys
 from os import environ, path
+from time import time
 from settings import *
 from sprites import *
 import vianpyro_random_map_generation_v1 as vmap1
@@ -46,10 +47,13 @@ class Game:
         # game loop - set self.playing = False to end the game
         self.playing = True
         while self.playing:
+            fps_time = time()  # FPS COUNT
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
             self.draw()
+            pg.display.set_caption(f'{TITLE} (FPS: {round(1.0 / (time() - fps_time))})')  # Display FPS
+
 
     def quit(self):
         pg.quit()
@@ -79,14 +83,6 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.quit()
-                if event.key in [pg.K_LEFT, pg.K_a]:
-                    self.player.move(dx=-1)
-                if event.key in [pg.K_RIGHT, pg.K_d]:
-                    self.player.move(dx=1)
-                if event.key in [pg.K_UP, pg.K_w]:
-                    self.player.move(dy=-1)
-                if event.key in [pg.K_DOWN, pg.K_s]:
-                    self.player.move(dy=1)
 
     def show_start_screen(self):
         pass
