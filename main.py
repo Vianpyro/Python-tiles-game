@@ -4,6 +4,7 @@ from os import environ, path
 from time import time
 from settings import *
 from sprites import *
+from tilemap import *
 import vianpyro_random_map_generation_v1 as vmap1
 
 
@@ -19,21 +20,15 @@ class Game:
 
     def load_data(self):
         game_folder = path.dirname(__file__)
-        MAP = vmap1.Map(int(GRID_WIDTH), int(GRID_HEIGHT), 1, 0, 5)
-        MAP.save_to_file(MAP.generate_2d_noise(), True, True, 1)
-        self.map_data = []
-        try:
-            with open(path.join(game_folder, 'save.wia'), 'r') as f:
-                for line in f:
-                    self.map_data.append(line)
-        except: 
-            print('No \'save.wia\' file found, make sure it is in the same folder as \'main.py\'')
-
+        NEW_MAP = vmap1.Map(int(GRID_WIDTH * 1.5), int(GRID_HEIGHT * 1.5), 1, 0, 4)
+        NEW_MAP.save_to_file(NEW_MAP.generate_2d_noise(), True, True, 1)
+        self.map = Map(path.join(game_folder, 'save.wia'))
+        
     def new(self):
         # initialize all variables and do all the setup for a new game
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        for row, tiles in enumerate(self.map_data):
+        for row, tiles in enumerate(self.map.data):
             for column, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, column, row)
@@ -41,6 +36,7 @@ class Game:
                     self.player = Player(self, column, row)
         try: self.player.move(0, 0)
         except: self.player = Player(self, GRID_WIDTH // 2 - 1, GRID_HEIGHT // 2 - 1)
+        self.camera = Camera(self.map.width, self.map.height)
 
 
     def run(self):
@@ -62,6 +58,7 @@ class Game:
     def update(self):
         # update portion of the game loop
         self.all_sprites.update()
+        self.camera.update(self.player)
 
     def draw_grid(self):
         for x in range(0, WIDTH, TILE_SIZE):
@@ -72,7 +69,8 @@ class Game:
     def draw(self):
         self.screen.fill(BGCOLOR)
         self.draw_grid()
-        self.all_sprites.draw(self.screen)
+        for sprite in self.all_sprites:
+            self.screen.blit(sprite.image, self.camera.apply(sprite))
         pg.display.flip()
 
     def events(self):

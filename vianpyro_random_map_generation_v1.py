@@ -1,12 +1,10 @@
 from random import randint
 from os import path
 
-class Map():
+class Map:
     def __init__(self, width, height, details=1, minID=0, maxID=1, preferedID=None):
-        if width <= 1: self.width = 2
-        else: self.width = width
-        if height <= 1: self.height = 2
-        else: self.height = height
+        self.width = max(2, width)
+        self.height = max(2, height)
         if details < 0 or details // 1.5 > minID + maxID: self.details = minID + maxID // 2
         else: self.details = details
         if minID > maxID: self.minID, self.maxID = maxID, minID
@@ -41,6 +39,7 @@ class Map():
                     if value == 0 and replace_zero_with != '': f.write(str(replace_zero_with) + separator)
                     else: f.write(str(value) + separator)
                 f.write('\n')
+            f.close()
     
     def smooth(self, array):
         for line in range (1, len(array)):
